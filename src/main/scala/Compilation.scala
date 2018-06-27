@@ -5,11 +5,17 @@ import sbt._, Keys._
 object Compilation {
 
   val buildSettings = Seq(
-
     scalaVersion := "2.12.6",
+    crossScalaVersions := Seq("2.11.12", "2.12.6", "2.13.0-M4"),
+    scalacOptions := stdScalacOptions ++ crossScalacOptions(scalaVersion.value)
+  )
 
-    // borrowed from https://tpolecat.github.io/2017/04/25/scalac-flags.html 
-    scalacOptions ++= Seq(
+  val projectSettings = Seq(
+    scalacOptions in (Compile, console) --= Seq("-Ywarn-unused:imports", "-Xfatal-warnings") 
+  )
+
+  // borrowed from https://tpolecat.github.io/2017/04/25/scalac-flags.html
+  val stdScalacOptions = Seq(
       "-deprecation",                      // Emit warning and location for usages of deprecated APIs.
       "-encoding", "utf-8",                // Specify character encoding used by source files.
       "-explaintypes",                     // Explain type errors in more detail.
@@ -39,7 +45,6 @@ object Compilation {
       "-Xlint:stars-align",                // Pattern sequence wildcard must align with sequence component.
       "-Xlint:type-parameter-shadow",      // A local type parameter shadows a type already in scope.
       "-Xlint:unsound-match",              // Pattern match may not be typesafe.
-      "-Yno-adapted-args",                 // Do not adapt an argument list (either by inserting () or creating a tuple) to match the receiver.
       "-Ypartial-unification",             // Enable partial unification in type constructor inference
       "-Ywarn-dead-code",                  // Warn when dead code is identified.
       "-Ywarn-extra-implicit",             // Warn when more than one implicit parameter section is defined.
@@ -55,11 +60,13 @@ object Compilation {
       "-Ywarn-unused:patvars",             // Warn if a variable bound in a pattern is unused.
       "-Ywarn-unused:privates",            // Warn if a private member is unused.
       "-Ywarn-value-discard"               // Warn when non-Unit expression results are unused.
-    ),
-  )
+    )
 
-  val projectSettings = Seq(
-    scalacOptions in (Compile, console) --= Seq("-Ywarn-unused:imports", "-Xfatal-warnings") 
-  )
-
+  def crossScalacOptions(version: String): Seq[String] = CrossVersion.partialVersion(version) match {
+    case Some((2L, x)) if x < 13 => Seq(
+      "-Yno-adapted-args", // Do not adapt an argument list (either by inserting () or creating a tuple) to match the receiver.
+    )
+    case _ => Seq()
+    
+  }
 }
