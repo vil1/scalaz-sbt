@@ -21,7 +21,7 @@ object Compilation {
       "-Ywarn-unused:imports",
       "-Xfatal-warnings"
     ),
-    resolvers += Seq(
+    resolvers ++= Seq(
       "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
     ),
     libraryDependencies ++= compilerPlugins ++ Seq(
